@@ -1,0 +1,47 @@
+五步即可完成项目搭建
+
+(这里使用svn在eclipse中签出代码,git道理是一样的)
+
+1 签出llsfw-web项目
+
+2 签出llsfw-webdemo项目,并重命名为你想要的项目名称
+
+(这里项目命名为demo)
+
+(选中两个项目,将其转换为maven工程)
+
+(编译一下,看有没什么问题)
+
+(这时你看web上下文依然是llsfw-webdemo,当然这是不对的,需要改成我们的项目名称demo)
+
+(通过修改pom的方式,修改<artifactId>为项目名称,注意底部的<finalName>也要改一下)
+
+(修改完毕以后update一下项目,完成后,web上下文就变更过来了.)
+
+(通常项目都要上传自己公司内部的SVN上的,大家可以将demo这个项目脱离osc的svn管控,这时大家就能将demo这个项目上传到别的svn上了)
+
+3 执行llsfw-documentation/llsfw_db_model/LLSFW-CORE-DB.pdm中的脚本
+
+(可以签出llsfw-documentation项目)
+
+(打开PDM,生成建表脚本,在这里我就不跑脚本了)
+
+(注意:quartz的初始化脚本也要跑,在llsfw-documentation\quartz-2.2.2\dbTables目录下,选择自己的数据库类型)
+
+(工作流的脚本是自动生成的,无需预先跑)
+
+4 执行llsfw-documentation/data/中的数据初始化脚本
+
+(这些脚本都跑一遍,没有先后顺序)
+
+5 部署TOMCAT,启动
+
+(在部署之前,先确认jndi的配置,查看resources.properties文件的connection.jndi,然后在tomcat的context.xml文件中配置Resource)
+
+(现在开始部署启动)
+
+(启动成功,在浏览器访问http://127.0.0.1:8080/demo)
+
+(现在已经能正常访问了)
+
+(部署完成)

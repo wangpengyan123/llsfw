@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.llsfw.webcore.mapper.expand.permissions.IPermissionsMapper">
+    <select id="reportExceptionCount" resultType="java.util.HashMap">
+        SELECT EXCEPTION_CLASS,COUNT(1) CCOUNT FROM TT_REQUEST_RESPONSE_LOG WHERE CREATE_DATE>SYSDATE-7 GROUP BY EXCEPTION_CLASS
+    </select>
+    <select id="reportSessionCount" resultType="java.util.HashMap">
+        SELECT DDATE,CCOUNT FROM (
+        SELECT DDATE,COUNT(SESSION_ID) CCOUNT FROM (
+        SELECT SESSION_ID,TO_CHAR(CREATE_DATE,'YYYY-MM-DD') DDATE FROM TT_ONLINE_SESSION_HIS
+        WHERE CREATE_DATE>SYSDATE-7
+        ) GROUP BY DDATE
+        ) ORDER BY DDATE DESC
+    </select>
+    <select id="reportRequestCount" resultType="java.util.HashMap">
+        SELECT DDATE,CCOUNT FROM (
+        SELECT DDATE,COUNT(REQUEST_ID) CCOUNT FROM (
+        SELECT REQUEST_ID,TO_CHAR(CREATE_DATE,'YYYY-MM-DD') DDATE FROM TT_REQUEST_RESPONSE_LOG
+        WHERE CREATE_DATE>SYSDATE-7
+        ) GROUP BY DDATE
+        ) ORDER BY DDATE DESC
+    </select>
+    <select id="loadOnlineSecctionData" resultType="java.util.HashMap">
+        SELECT C.REMOTE_HOST,A.SESSION_CREATE_DATE FROM TT_ONLINE_SESSION A
+        LEFT JOIN (
+        SELECT B.SESSION_ID,B.REMOTE_HOST FROM TT_REQUEST_RESPONSE_LOG B GROUP BY B.SESSION_ID,B.REMOTE_HOST
+        ) C ON A.SESSION_ID=C.SESSION_ID
+        WHERE C.REMOTE_HOST IS NOT NULL
+        ORDER BY A.CREATE_DATE DESC
+    </select>
+    <select id="getPortalList" resultType="java.util.HashMap">
+        SELECT B.PORTAL_CODE,B.PORTAL_TITLE,C.FUNCTION_NAME FROM TS_PORTAL B
+        LEFT JOIN TS_FUNCTION C ON B.FUNCTION_CODE=C.FUNCTION_CODE
+        WHERE B.PORTAL_CODE NOT IN (
+        SELECT A.PORTAL_CODE FROM TS_USER_PORTAL A WHERE A.LOGIN_NAME=#{loginName}
+        )
+        AND B.FUNCTION_CODE IN
+        <foreach collection="functionCodeList" item="listItem" open="(" close=")" separator=",">
+            #{listItem}
+        </foreach>
+    </select>
+    <select id="getUserPortal" resultType="java.util.HashMap">
+        SELECT A.*,B.*,C.*
+        FROM TS_USER_PORTAL A
+        LEFT JOIN TS_PORTAL B ON A.PORTAL_CODE=B.PORTAL_CODE
+        LEFT JOIN TS_FUNCTION C ON B.FUNCTION_CODE=C.FUNCTION_CODE
+        WHERE A.LOGIN_NAME=#{loginName}
+        ORDER BY A.PORTAL_INDEX,A.PORTAL_SORT ASC
+    </select>
+    <select id="getFunctionAllList" resultType="java.util.HashMap">
+        SELECT D.FUNCTION_CODE,D.PURVIEW_CODE FROM TS_PURVIEW D
+        WHERE NOT EXISTS (
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FROM TS_ROLE_FUNCTION A,TS_JOB_ROLE B,TS_USER_JOB C
+        WHERE A.ROLE_CODE=B.ROLE_CODE AND B.JOB_CODE=C.JOB_CODE
+        AND C.LOGIN_NAME=#{userName}
+        AND A.FUNCTION_CODE=D.FUNCTION_CODE
+        AND A.PURVIEW_CODE=D.PURVIEW_CODE
+        )
+    </select>
+    <select id="loadJobList" resultType="java.util.HashMap">
+        SELECT B.LOGIN_NAME,A.JOB_CODE,A.JOB_NAME,C.ORG_CODE,C.ORG_NAME
+        FROM TS_JOB A
+        LEFT JOIN TS_USER_JOB B ON A.JOB_CODE=B.JOB_CODE AND B.LOGIN_NAME=#{loginName}
+        LEFT JOIN TS_ORGANIZATION C ON A.ORG_CODE=C.ORG_CODE
+        WHERE C.ORG_CODE = #{orgCode}
+        ORDER BY A.CREATE_DATE DESC
+    </select>
+    <select id="countOrg" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM TS_JOB A,TS_USER_JOB B
+        WHERE A.JOB_CODE=B.JOB_CODE AND A.ORG_CODE=#{orgCode} AND B.LOGIN_NAME=#{loginName}
+    </select>
+    <select id="getFunctionData" resultType="java.util.HashMap">
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FROM TS_ROLE_FUNCTION A,TS_JOB_ROLE B
+        WHERE A.ROLE_CODE=B.ROLE_CODE
+        AND B.JOB_CODE = #{jobCode}
+        GROUP BY A.FUNCTION_CODE,A.PURVIEW_CODE
+    </select>
+    <select id="getOrgList" resultType="java.util.HashMap">
+        SELECT AA.ORG_CODE,AA.ORG_NAME,AA.PARENT_ORG_CODE,AA.ORG_SORT FROM (
+        SELECT A.ORG_CODE,A.ORG_NAME,A.PARENT_ORG_CODE,A.ORG_SORT
+        FROM TS_ORGANIZATION A,TS_JOB B,TS_USER_JOB C
+        WHERE A.ORG_CODE=B.ORG_CODE AND B.JOB_CODE=C.JOB_CODE
+        AND C.LOGIN_NAME=#{loginName}
+        <if test="jobCodes!=null">
+            AND C.JOB_CODE IN
+            <foreach collection="jobCodes" item="listItem" open="(" close=")" separator=",">
+                #{listItem}
+            </foreach>
+        </if>
+        GROUP BY A.ORG_CODE,A.ORG_NAME,A.PARENT_ORG_CODE,A.ORG_SORT
+        ) AA ORDER BY AA.ORG_SORT ASC
+    </select>
+    <select id="getUserFunction" resultType="java.util.HashMap">
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FROM TS_USER_FUNCTION A
+        WHERE A.LOGIN_NAME=#{loginName}
+        GROUP BY A.FUNCTION_CODE,A.PURVIEW_CODE
+    </select>
+    <select id="getJobFunction" resultType="java.util.HashMap">
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FROM TS_ROLE_FUNCTION A,TS_JOB_ROLE B,TS_USER_JOB C
+        WHERE A.ROLE_CODE=B.ROLE_CODE AND B.JOB_CODE=C.JOB_CODE
+        AND C.LOGIN_NAME=#{loginName}
+        <if test="jobCodes!=null">
+            AND C.JOB_CODE IN
+            <foreach collection="jobCodes" item="listItem" open="(" close=")" separator=",">
+                #{listItem}
+            </foreach>
+        </if>
+        <if test="roleCodes!=null">
+            AND B.ROLE_CODE IN
+            <foreach collection="roleCodes" item="listItem" open="(" close=")" separator=",">
+                #{listItem}
+            </foreach>
+        </if>
+        GROUP BY A.FUNCTION_CODE,A.PURVIEW_CODE
+    </select>
+    <select id="getUserJobRoleList" resultType="java.util.HashMap">
+        SELECT A.ROLE_CODE,A.ROLE_NAME,C.JOB_NAME,B.CREATE_BY,B.CREATE_DATE
+        FROM TS_ROLE A,TS_JOB_ROLE B,TS_JOB C,TS_USER_JOB D
+        WHERE A.ROLE_CODE=B.ROLE_CODE AND B.JOB_CODE=C.JOB_CODE AND C.JOB_CODE=D.JOB_CODE
+        AND D.LOGIN_NAME=#{loginName}
+        <if test="jobCodes!=null">
+            AND B.JOB_CODE IN
+            <foreach collection="jobCodes" item="listItem" open="(" close=")" separator=",">
+                #{listItem}
+            </foreach>
+        </if>
+        ORDER BY A.CREATE_DATE DESC
+    </select>
+    <select id="getUserJobList" resultType="java.util.HashMap">
+        SELECT A.LOGIN_NAME,B.JOB_CODE,B.JOB_NAME,C.ORG_NAME,A.CREATE_DATE,A.CREATE_BY
+        FROM TS_USER_JOB A,TS_JOB B,TS_ORGANIZATION C
+        WHERE A.JOB_CODE=B.JOB_CODE AND B.ORG_CODE=C.ORG_CODE
+        AND A.LOGIN_NAME=#{loginName}
+        ORDER BY A.CREATE_DATE DESC
+    </select>
+    <select id="getUserListPageQuery" resultType="java.util.HashMap">
+        SELECT
+        LOGIN_NAME,
+        USER_NAME,
+        USER_PHONE,
+        USER_M_PHOME,
+        USER_EMAIL,
+        USER_STATUS,
+        CREATE_BY,
+        CREATE_DATE,
+        UPDATE_BY,
+        UPDATE_DATE
+        FROM TS_APPLICATION_USER
+        WHERE 1=1
+        <if test="loginNameParam!=null and loginNameParam!=''">
+            AND LOGIN_NAME LIKE #{loginNameParam}
+        </if>
+        <if test="userNameParam!=null and userNameParam!=''">
+            AND USER_NAME LIKE #{userNameParam}
+        </if>
+        ORDER BY LOGIN_NAME ASC
+    </select>
+    <select id="getNotExistsRoleByJobCode" resultType="java.util.HashMap">
+        SELECT A.ROLE_CODE,A.ROLE_NAME FROM TS_ROLE A
+        WHERE NOT EXISTS(
+        SELECT
+        B.ROLE_CODE
+        FROM TS_JOB_ROLE B
+        WHERE
+        B.JOB_CODE=#{jobCode}
+        AND B.ROLE_CODE=A.ROLE_CODE
+        )ORDER BY A.ROLE_CODE ASC
+    </select>
+    <select id="getJobByOrgCode" resultType="java.util.HashMap">
+        SELECT A.JOB_CODE,A.JOB_NAME,
+        B.ORG_CODE,B.ORG_NAME,
+        A.CREATE_BY,A.CREATE_DATE,
+        A.UPDATE_BY,A.UPDATE_DATE
+        FROM TS_JOB
+        A,TS_ORGANIZATION B
+        WHERE A.ORG_CODE=B.ORG_CODE
+        <if test="orgCode">
+            AND B.ORG_CODE=#{orgCode}
+        </if>
+        ORDER BY A.CREATE_DATE
+        DESC
+    </select>
+    <select id="getRoleByJobCode" resultType="java.util.HashMap">
+        SELECT A.JOB_CODE,B.ROLE_CODE,B.ROLE_NAME,A.CREATE_BY,A.CREATE_DATE
+        FROM TS_JOB_ROLE
+        A,TS_ROLE B
+        WHERE A.ROLE_CODE=B.ROLE_CODE
+        AND A.JOB_CODE=#{jobCode}
+        ORDER BY A.CREATE_DATE DESC
+    </select>
+    <select id="getChildrenOrg" resultType="java.util.HashMap">
+        SELECT ORG_CODE,ORG_NAME FROM TS_ORGANIZATION
+        WHERE PARENT_ORG_CODE=#{parentOrgCode}
+        ORDER
+        BY ORG_SORT ASC
+    </select>
+    <select id="getRootOrg" resultType="java.util.HashMap">
+        SELECT ORG_CODE,ORG_NAME FROM TS_ORGANIZATION
+        WHERE PARENT_ORG_CODE= #{rootCode}
+        ORDER BY ORG_SORT
+        ASC
+    </select>
+    <select id="findNotIncludePurviewByRoleFunction" resultType="java.util.HashMap">
+        SELECT A.PURVIEW_CODE,A.PURVIEW_NAME FROM TS_PURVIEW A WHERE NOT
+        EXISTS(
+        SELECT 1 FROM TS_ROLE_FUNCTION B WHERE B.ROLE_CODE=#{roleCode}
+        AND A.FUNCTION_CODE=B.FUNCTION_CODE AND
+        A.PURVIEW_CODE=B.PURVIEW_CODE
+        ) AND A.function_code=#{functionCode}
+        ORDER BY A.PURVIEW_CODE ASC
+    </select>
+    <select id="findNotIncludeFunctionPurviewByRole" resultType="java.util.HashMap">
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FROM TS_PURVIEW A WHERE NOT
+        EXISTS(
+        SELECT B.FUNCTION_CODE,B.PURVIEW_CODE FROM TS_ROLE_FUNCTION B WHERE B.ROLE_CODE=#{roleCode}
+        AND
+        A.FUNCTION_CODE=B.FUNCTION_CODE AND A.PURVIEW_CODE=B.PURVIEW_CODE
+        )ORDER BY A.FUNCTION_CODE,A.PURVIEW_CODE ASC
+    </select>
+    <select id="findFunctionPurviewByRole" resultType="java.util.HashMap">
+        SELECT FUNCTION_CODE,PURVIEW_CODE FROM TS_ROLE_FUNCTION WHERE
+        ROLE_CODE=#{roleCode}
+    </select>
+    <select id="getRoleList" resultType="java.util.HashMap">
+        SELECT * FROM TS_ROLE ORDER BY CREATE_DATE DESC
+    </select>
+    <select id="appNode" resultType="java.util.HashMap">
+        SELECT * FROM TS_FUNCTION
+        WHERE LEVEL_NO=#{levelNo}
+        AND PARENT_FUNCTION_CODE =#{parentFunctionCode}
+        ORDER BY SORT ASC
+    </select>
+    <select id="findUserPermissions" resultType="java.util.HashMap">
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FUNCTION_PURVIEW
+        FROM TS_USER_FUNCTION A
+        LEFT
+        JOIN TS_FUNCTION B ON A.FUNCTION_CODE=B.FUNCTION_CODE
+        LEFT JOIN TS_PURVIEW C ON A.PURVIEW_CODE=C.FUNCTION_CODE AND
+        A.PURVIEW_CODE=C.PURVIEW_CODE
+        WHERE B.STATUS=1 AND A.LOGIN_NAME=#{loginName}
+    </select>
+    <select id="findRolePermissions" resultType="java.util.HashMap">
+        SELECT A.FUNCTION_CODE,A.PURVIEW_CODE FUNCTION_PURVIEW
+        FROM TS_ROLE_FUNCTION A
+        LEFT JOIN TS_FUNCTION B ON
+        A.FUNCTION_CODE=B.FUNCTION_CODE
+        LEFT JOIN TS_PURVIEW C ON A.PURVIEW_CODE=C.FUNCTION_CODE AND A.PURVIEW_CODE=C.PURVIEW_CODE
+        WHERE
+        B.STATUS=1 AND ROLE_CODE IN
+        <foreach collection="roleList" item="listItem" open="(" close=")" separator=",">
+            #{listItem}
+        </foreach>
+    </select>
+    <select id="getFunctionList" resultType="java.util.HashMap">
+        SELECT * FROM TS_FUNCTION D
+        WHERE D.STATUS=1
+        <if test="parentFunctionCode">
+            AND D.PARENT_FUNCTION_CODE=#{parentFunctionCode}
+        </if>
+        AND D.FUNCTION_CODE in
+        <foreach collection="functionCodeList" item="listItem" open="(" close=")" separator=",">
+            #{listItem}
+        </foreach>
+        ORDER BY D.SORT ASC
+    </select>
+    <select id="getParentFunctionListCode" resultType="java.lang.String">
+        SELECT DISTINCT
+        D.PARENT_FUNCTION_CODE
+        FROM TS_FUNCTION D
+        WHERE D.STATUS=1 AND D.FUNCTION_CODE in
+        <foreach collection="functionCodeList" item="listItem" open="(" close=")" separator=",">
+            #{listItem}
+        </foreach>
+    </select>
+    <select id="findUserFunctions" resultType="java.lang.String">
+        SELECT A.FUNCTION_CODE FUNCTION_PURVIEW
+        FROM TS_USER_FUNCTION A
+        LEFT JOIN TS_FUNCTION B
+        ON
+        A.FUNCTION_CODE=B.FUNCTION_CODE
+        LEFT JOIN TS_PURVIEW C ON A.PURVIEW_CODE=C.FUNCTION_CODE AND
+        A.PURVIEW_CODE=C.PURVIEW_CODE
+        WHERE
+        B.STATUS=1 AND B.FUNCTION_ACCESS_CHANNEL=#{functionAccessChannel} AND A.LOGIN_NAME=#{loginName}
+    </select>
+    <select id="findRoleFunctions" resultType="java.lang.String">
+        SELECT A.FUNCTION_CODE FUNCTION_PURVIEW
+        FROM TS_ROLE_FUNCTION A
+        LEFT JOIN TS_FUNCTION B ON
+        A.FUNCTION_CODE=B.FUNCTION_CODE
+        LEFT JOIN TS_PURVIEW C ON A.PURVIEW_CODE=C.FUNCTION_CODE AND A.PURVIEW_CODE=C.PURVIEW_CODE
+        WHERE B.STATUS=1 AND B.FUNCTION_ACCESS_CHANNEL=#{functionAccessChannel} AND ROLE_CODE IN
+        <foreach collection="roleList" item="listItem" open="(" close=")" separator=",">
+            #{listItem}
+        </foreach>
+    </select>
+    <select id="findUserRoles" resultType="java.lang.String">
+        SELECT B.ROLE_CODE FROM TS_JOB_ROLE B WHERE EXISTS (
+        SELECT A.JOB_CODE FROM TS_USER_JOB A
+        WHERE A.LOGIN_NAME=#{loginName} AND A.JOB_CODE=B.JOB_CODE
+        )
+    </select>
+</mapper>

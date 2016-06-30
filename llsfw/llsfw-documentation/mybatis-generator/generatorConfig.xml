@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-webgen-config_1_0.dtd" >
+<generatorConfiguration>
+
+	<!-- 设置mssql驱动路径 -->
+	<classPathEntry location="ojdbc6.jar" />
+
+	<context id="framework" targetRuntime="MyBatis3">
+
+		<property name="suppressTypeWarnings" value="true" />
+
+		<!-- 插件参考 : http://mbg.cndocs.tk/reference/plugins.html -->
+		<!-- <plugin type="org.mybatis.webgen.plugins.RowBoundsPlugin" /> -->
+		<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+		<plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin" />
+		<plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin">
+			<!-- 此处是将Example改名为Criteria -->
+			<property name="searchString" value="Example$" />
+			<property name="replaceString" value="Criteria" />
+		</plugin>
+
+		<commentGenerator>
+			<!-- 是否去除自动生成的注释，默认false，true：去除；false：不去除 -->
+			<property name="suppressAllComments" value="false" />
+			<!-- 指定在生成的注释是否将包括时间戳，默认是false -->
+			<property name="suppressDate" value="false" />
+		</commentGenerator>
+
+		<!-- 数据库连接的信息：驱动类、连接地址、用户名、密码 -->
+		<jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@192.168.16.127:1521:asmp" userId="llsfw_v2" password="llsfw_v2" />
+
+		<!-- 解决数字转换问题 -->
+		<javaTypeResolver>
+			<!-- 只有一个属于forceBigDecimals，默认false。如果字段精确超过0，生成BigDecimal 如果字段精确是0，总长度10-18生成Long; 如果字段精确是0，总长5-9生成Integer; 如果字段精确是0，总长小于5生成Short; 如果forceBigDecimals为true,统一生成BigDecimal -->
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+		<!-- Model生成配置 targetPackage：生成包路径，自动生成目录。targetProject：项目路经，可以绝对路径或者相对路径。 -->
+		<javaModelGenerator targetPackage="com.llsfw.webgen.model.standard.permissions" targetProject="../../llsfw-webgen/src/main/java"></javaModelGenerator>
+
+		<!-- sqlMap配置 -->
+		<sqlMapGenerator targetPackage="sqlmap.llsfw.webgen.standard.permissions" targetProject="../../llsfw-webgen/src/main/resources" />
+
+		<!-- DAO接口的生成 -->
+		<javaClientGenerator targetPackage="com.llsfw.webgen.mapper.standard.permissions" targetProject="../../llsfw-webgen/src/main/java" type="XMLMAPPER" />
+
+		<!-- 需要生成的表(整形数字使用NUMBER类型,浮点型数字使用FLOAT类型) -->
+		<!-- <table tableName="TT_REQUEST_RESPONSE_LOG"></table> <table tableName="TT_ONLINE_SESSION"></table> <table tableName="TT_ONLINE_SESSION_HIS"></table> -->
+		<!-- <table tableName="TT_SERVER_GLOBAL_PARAMETERS"></table> <table tableName="TT_SCHEDULED_LOG"></table> <table tableName="TT_SCHEDULED_TRIGGER_LOG"></table> -->
+		<table tableName="TS_APPLICATION_USER"></table>
+		<table tableName="TS_USER_JOB"></table>
+		<table tableName="TS_USER_FUNCTION"></table>
+		<table tableName="TS_ROLE_FUNCTION"></table>
+		<table tableName="TS_ROLE"></table>
+		<table tableName="TS_PURVIEW"></table>
+		<table tableName="TS_ORGANIZATION"></table>
+		<table tableName="TS_JOB_ROLE"></table>
+		<table tableName="TS_JOB"></table>
+		<table tableName="TS_FUNCTION"></table>
+		<table tableName="TS_PORTAL"></table>
+		<table tableName="TS_USER_PORTAL"></table>
+	</context>
+</generatorConfiguration>

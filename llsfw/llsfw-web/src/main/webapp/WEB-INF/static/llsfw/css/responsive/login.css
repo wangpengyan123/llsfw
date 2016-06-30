@@ -1,0 +1,20 @@
+body {
+	padding-top: 70px;
+	background-color: #f3f3f4;
+}
+
+.form-signin {
+	max-width: 300px;
+	margin: 0 auto;
+}
+
+.page-summary {
+	padding-bottom: 9px;
+	border-bottom: 1px solid #eee;
+}
+
+.form-control, .input-group-addon {
+	border: 1px solid #e5e6e7;
+	border-radius: 1px;
+	color: inherit;
+}

@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.llsfw</groupId>
+	<artifactId>llsfw-webdemo</artifactId>
+	<packaging>war</packaging>
+	<version>2.3.3-RELEASE</version>
+	<name>llsfw Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+
+		<!-- servlet-api -->
+		<dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+		<!-- llsfw-web -->
+		<dependency>
+			<groupId>com.llsfw</groupId>
+			<artifactId>llsfw-webcore</artifactId>
+			<version>2.3.3-RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>com.llsfw</groupId>
+			<artifactId>llsfw-web</artifactId>
+			<version>2.3.3-RELEASE</version>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>com.llsfw</groupId>
+			<artifactId>llsfw-activiti</artifactId>
+			<version>2.3.3-RELEASE</version>
+		</dependency>
+        <dependency>
+            <groupId>com.llsfw</groupId>
+            <artifactId>llsfw-wx</artifactId>
+            <version>2.3.3-RELEASE</version>
+        </dependency>
+
+		<!-- oracle -->
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.2.0.1.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<overlays>
+						<overlay>
+							<groupId>com.llsfw</groupId>
+							<artifactId>llsfw-web</artifactId>
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+		</plugins>
+		<finalName>llsfw-webdemo</finalName>
+	</build>
+</project>

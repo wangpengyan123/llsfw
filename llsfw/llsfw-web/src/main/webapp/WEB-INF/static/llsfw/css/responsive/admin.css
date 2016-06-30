@@ -1,0 +1,27 @@
+body {
+	padding-top: 70px;
+	background-color: #f3f3f4;
+}
+
+.left-function-panle {
+	font-size: 12px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+.left-function-panle, img {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.left-function-panle:hover {
+	color: #fff;
+	background-color: #563d7c;
+	border-radius: 5px;
+}
+
+.left-function-panle-active {
+	color: #fff;
+	background-color: #563d7c;
+	border-radius: 5px;
+}

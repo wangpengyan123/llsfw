@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 安全管理器 -->
+    <!-- 注释掉sessionManager和cacheManager则为[内存会话] -->
+    <!-- 去注释sessionManager和cacheManager则为[集群会话] -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- realms -->
+        <property name="realms">
+            <list>
+                <!-- Web Application Realm -->
+                <ref bean="systemAuthorizingRealm" />
+                <!-- Web Service Realm login -->
+                <ref bean="apiLoginAuthorizingRealm" />
+                <!-- Web Service Realm -->
+                <ref bean="apiAuthorizingRealm" />
+            </list>
+        </property>
+        <!-- 区别web登陆和无状态登陆 -->
+        <property name="subjectDAO.sessionStorageEvaluator" ref="multiSessionStorageEvaluator" />
+        <!-- 一种token只使用一个realm -->
+        <property name="authenticator.authenticationStrategy" ref="firstExceptionStrategy" />
+        <!-- <property name="sessionManager" ref="sessionManager" /> -->
+        <!-- <property name="cacheManager" ref="cacheManager" /> -->
+    </bean>
+
+    <!-- shiro过滤器 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />
+        <property name="loginUrl" value="${security.loginUrl}" />
+        <property name="filters">
+            <util:map>
+                <!-- Web Application 过滤器 -->
+                <entry key="systemLoginAuthc" value-ref="systemLoginAuthcFilter" />
+                <!-- Web Service 登陆 过滤器 -->
+                <entry key="apiLoginAuthc" value-ref="apiLoginAuthcFilter" />
+                <!-- Web Service 过滤器 -->
+                <entry key="apiAuthc" value-ref="apiAuthcFilter" />
+            </util:map>
+        </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /favicon.ico = anon
+                /static/** = anon
+                /index/** = anon
+                /wx/callBack/** = anon
+                /logout = logout
+                ${security.loginUrl} = systemLoginAuthc
+                ${security.api.loginUrl} = apiLoginAuthc
+                ${security.api.path} = apiAuthc
+                ${security.services.path} = apiAuthc
+                /admin/** = user
+                /** = user
+            </value>
+        </property>
+    </bean>
+</beans>

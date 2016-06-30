@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.llsfw.webcore.mapper.expand.quartz.IQuartzMapper">
+    <select id="reportSchedulerRunStatus" resultType="java.util.HashMap">
+        SELECT STATUS,COUNT(1) STATUS_COUNT FROM TT_SCHEDULED_TRIGGER_LOG GROUP BY STATUS
+    </select>
+    <select id="reportTriggerRunStatus" resultType="java.util.HashMap">
+        SELECT STATUS,COUNT(1) STATUS_COUNT FROM TT_SCHEDULED_TRIGGER_LOG WHERE TRIGGER_NAME=#{triggerName} AND TRIGGER_GROUP=#{triggerGroup} GROUP BY STATUS
+    </select>
+    <select id="reportJobRunStatus" resultType="java.util.HashMap">
+        SELECT STATUS,COUNT(1) STATUS_COUNT FROM TT_SCHEDULED_TRIGGER_LOG WHERE JOB_NAME=#{jobName} AND JOB_GROUP=#{jobGroup} GROUP BY STATUS
+    </select>
+    <select id="loadSchedulerOptionHisPageQuery" resultType="java.util.HashMap">
+        SELECT LOGID,MSG,CREATE_DATE FROM TT_SCHEDULED_LOG
+        ORDER BY CREATE_DATE DESC
+    </select>
+    <select id="loadSchedulerState" resultType="java.util.HashMap">
+        SELECT * FROM QRTZ_SCHEDULER_STATE ORDER BY LAST_CHECKIN_TIME DESC
+    </select>
+    <select id="loadCurrentlyEexutingJobs" resultType="java.util.HashMap">
+        SELECT * FROM QRTZ_FIRED_TRIGGERS
+    </select>
+    <select id="lockTrigger" resultType="java.util.HashMap">
+        SELECT * FROM QRTZ_TRIGGERS WHERE TRIGGER_NAME=#{triggerName} AND TRIGGER_GROUP=#{triggerGroup} FOR UPDATE NOWAIT
+    </select>
+    <select id="getSimpleTriggerDetail" resultType="java.util.HashMap">
+        SELECT A.*,
+        B.DESCRIPTION,B.NEXT_FIRE_TIME,B.PREV_FIRE_TIME,B.PRIORITY,B.TRIGGER_STATE,B.TRIGGER_TYPE,B.START_TIME,B.END_TIME,B.CALENDAR_NAME,B.MISFIRE_INSTR,B.JOB_NAME,B.JOB_GROUP
+        FROM QRTZ_SIMPLE_TRIGGERS A
+        LEFT JOIN QRTZ_TRIGGERS B ON A.TRIGGER_NAME=B.TRIGGER_NAME AND A.TRIGGER_GROUP=B.TRIGGER_GROUP
+        WHERE A.TRIGGER_NAME=#{triggerName} AND A.TRIGGER_GROUP=#{triggerGroup}
+    </select>
+    <select id="getCronTriggerDetail" resultType="java.util.HashMap">
+        SELECT A.*,
+        B.DESCRIPTION,B.NEXT_FIRE_TIME,B.PREV_FIRE_TIME,B.PRIORITY,B.TRIGGER_STATE,B.TRIGGER_TYPE,B.START_TIME,B.END_TIME,B.CALENDAR_NAME,B.MISFIRE_INSTR,B.JOB_NAME,B.JOB_GROUP
+        FROM QRTZ_CRON_TRIGGERS A
+        LEFT JOIN QRTZ_TRIGGERS B ON A.TRIGGER_NAME=B.TRIGGER_NAME AND A.TRIGGER_GROUP=B.TRIGGER_GROUP
+        WHERE A.TRIGGER_NAME=#{triggerName} AND A.TRIGGER_GROUP=#{triggerGroup}
+    </select>
+    <select id="getTriggers" resultType="java.util.HashMap">
+        SELECT SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP,JOB_NAME,JOB_GROUP,DESCRIPTION,NEXT_FIRE_TIME,PREV_FIRE_TIME,PRIORITY,TRIGGER_STATE,TRIGGER_TYPE,START_TIME,END_TIME,CALENDAR_NAME,MISFIRE_INSTR FROM QRTZ_TRIGGERS WHERE 1=1
+        <if test="jobGroup!=null and jobGroup!=''">
+            and JOB_GROUP=#{jobGroup}
+        </if>
+        <if test="jobNameParam!=null and jobNameParam!=''">
+            and JOB_NAME LIKE #{jobNameParam}
+        </if>
+        <if test="triggerNameParam!=null and triggerNameParam!=''">
+            and TRIGGER_NAME LIKE #{triggerNameParam}
+        </if>
+        <if test="triggerGroup!=null and triggerGroup!=''">
+            and TRIGGER_GROUP=#{triggerGroup}
+        </if>
+        ORDER BY TRIGGER_NAME DESC
+    </select>
+    <select id="loadExecutionHistoryListPageQuery" resultType="java.util.HashMap">
+        SELECT
+        A.LOGID,
+        A.SCHEDULED_FIRE_TIME,
+        A.FIRE_TIME,
+        A.END_TIME,
+        A.JOB_RUN_TIME,
+        A.STATUS,
+        A.RESULT,
+        A.ERROR_MSG,
+        A.TRIGGER_NAME,
+        A.TRIGGER_GROUP,
+        A.JOB_NAME,
+        A.JOB_GROUP,
+        A.JOB_CLASS,
+        A.THREAD_GROUP_NAME,
+        A.THREAD_ID,
+        A.THREAD_PRIORITY,
+        A.SCHEDULED_ID,
+        A.SCHEDULED_NAME,
+        A.CREATE_DATE
+        FROM TT_SCHEDULED_TRIGGER_LOG A WHERE 1=1
+        <if test="execution_history_trigger_group!=null and execution_history_trigger_group!=''">
+            AND A.TRIGGER_GROUP=#{execution_history_trigger_group}
+        </if>
+        <if test="execution_history_trigger_name!=null and execution_history_trigger_name!=''">
+            AND A.TRIGGER_NAME=#{execution_history_trigger_name}
+        </if>
+        <if test="execution_history_job_group!=null and execution_history_job_group!=''">
+            AND A.JOB_GROUP=#{execution_history_job_group}
+        </if>
+        <if test="execution_history_job_name!=null and execution_history_job_name!=''">
+            AND A.JOB_NAME=#{execution_history_job_name}
+        </if>
+        <if test="execution_status!=null and execution_status!=''">
+            AND A.STATUS=#{execution_status}
+        </if>
+        ORDER BY A.CREATE_DATE DESC
+    </select>
+    <select id="loadJob" resultType="java.util.HashMap">
+        SELECT SCHED_NAME,JOB_NAME,JOB_GROUP,DESCRIPTION,JOB_CLASS_NAME,IS_DURABLE,IS_NONCONCURRENT,IS_UPDATE_DATA,REQUESTS_RECOVERY FROM QRTZ_JOB_DETAILS WHERE
+        JOB_GROUP=#{jobGroup} and JOB_NAME=#{jobName}
+    </select>
+    <select id="getJobs" resultType="java.util.HashMap">
+        SELECT SCHED_NAME,JOB_NAME,JOB_GROUP,DESCRIPTION,JOB_CLASS_NAME,IS_DURABLE,IS_NONCONCURRENT,IS_UPDATE_DATA,REQUESTS_RECOVERY FROM QRTZ_JOB_DETAILS WHERE 1=1
+        <if test="jobGroupParam!=null and jobGroupParam!=''">
+            and JOB_GROUP LIKE #{jobGroupParam}
+        </if>
+        <if test="jobNameParam!=null and jobNameParam!=''">
+            and JOB_NAME LIKE #{jobNameParam}
+        </if>
+        <if test="descriptionParam!=null and descriptionParam!=''">
+            and DESCRIPTION LIKE #{descriptionParam}
+        </if>
+        <if test="jobClassNameParam!=null and jobClassNameParam!=''">
+            and JOB_CLASS_NAME LIKE #{jobClassNameParam}
+        </if>
+        ORDER BY JOB_NAME DESC
+    </select>
+</mapper>

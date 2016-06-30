@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.llsfw.webcore.mapper.expand.serverparam.IServerParametersMapper">
+    <select id="getParamsList" resultType="java.util.HashMap">
+        SELECT * FROM TT_SERVER_GLOBAL_PARAMETERS WHERE 1=1
+        <if test="parametersCodeParam!=null and parametersCodeParam!=''">
+            and PARAMETERS_CODE LIKE #{parametersCodeParam}
+        </if>
+        <if test="parametersDescParam!=null and parametersDescParam!=''">
+            and PARAMETERS_DESC LIKE #{parametersDescParam}
+        </if>
+        ORDER BY PARAMETERS_CODE ASC
+    </select>
+</mapper>

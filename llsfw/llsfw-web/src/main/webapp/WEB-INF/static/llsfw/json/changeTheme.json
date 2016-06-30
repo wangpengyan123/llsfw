@@ -1,0 +1,43 @@
+[{
+    "text" : "default",
+    "value" : "default"
+},{
+    "text" : "black",
+    "value" : "black"
+},{
+    "text" : "bootstrap",
+    "value" : "bootstrap"
+},{
+    "text" : "gray",
+    "value" : "gray"
+},{
+    "text" : "metro",
+    "value" : "metro"
+},{
+    "text" : "metro-blue",
+    "value" : "metro-blue"
+},{
+    "text" : "metro-gray",
+    "value" : "metro-gray"
+},{
+    "text" : "metro-green",
+    "value" : "metro-green"
+},{
+    "text" : "metro-orange",
+    "value" : "metro-orange"
+},{
+    "text" : "metro-red",
+    "value" : "metro-red"
+},{
+    "text" : "ui-cupertino",
+    "value" : "ui-cupertino"
+},{
+    "text" : "ui-dark-hive",
+    "value" : "ui-dark-hive"
+},{
+    "text" : "ui-pepper-grinder",
+    "value" : "ui-pepper-grinder"
+},{
+    "text" : "ui-sunny",
+    "value" : "ui-sunny"
+}]

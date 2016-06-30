@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 数据库访问 jndi -->
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName">
+            <value>${connection.jndi}</value>
+        </property>
+    </bean>
+
+    <!-- 动态数据源 -->
+    <bean id="dynamicDataSource" class="${dynamicDataSource.class}">
+
+        <!-- dbcp配置参考 : http://agapple.iteye.com/blog/772507 -->
+
+        <!-- maxActive : 连接池中可同时连接的最大的连接数(默认值为8,高峰单机器在8并发左右,自己根据应用场景定) -->
+        <property name="maxActive" value="${dynamicDataSource.maxActive}" />
+
+        <!-- maxIdle : 连接池中最大的空闲的连接数,超过的空闲连接将被释放,如果设置为负数表示不限制(默认为8个,maxIdle不能设置太小,因为假如在高负载的情况下,连接的打开时间比关闭的时间快,会引起连接池中idle的个数 上升超过maxIdle,而造成频繁的连接销毁和创建,类似于jvm参数中的Xmx设置) -->
+        <property name="maxIdle" value="${dynamicDataSource.maxIdle}" />
+
+        <!-- minIdle : 连接池中最小的空闲的连接数,低于这个数量会被创建新的连接(默认为0,该参数越接近maxIdle,性能越好,因为连接的创建和销毁,都是需要消耗资源的;但是不能太大,因为在机器很空闲的时候,也会创建低于minidle个数的连接,类似于jvm参数中的Xmn设置) -->
+        <property name="minIdle" value="${dynamicDataSource.minIdle}" />
+
+        <!-- maxWait : 最大等待时间,当没有可用连接时,连接池等待连接释放的最大时间,超过该时间限制会抛出异常,如果设置-1表示无限等待(默认为无限,避免因线程池不够用,而导致请求被无限制挂起) -->
+        <property name="maxWait" value="${dynamicDataSource.maxWait}" />
+
+        <!-- minEvictableIdleTimeMillis : 连接池中连接,在时间段内一直空闲,被逐出连接池的时间 ,(默认为30分钟,可以适当做调整,需要和后端服务端的策略配置相关) -->
+        <property name="minEvictableIdleTimeMillis" value="${dynamicDataSource.minEvictableIdleTimeMillis}" />
+
+        <!-- removeAbandonedTimeout : 超过时间限制,回收没有用(废弃)的连接(默认为 300秒) -->
+        <property name="removeAbandonedTimeout" value="${dynamicDataSource.removeAbandonedTimeout}" />
+
+        <!-- removeAbandoned : 超过removeAbandonedTimeout时间后,是否进 行没用连接(废弃)的回收(默认为false) -->
+        <property name="removeAbandoned" value="${dynamicDataSource.removeAbandoned}" />
+
+        <!-- testOnBorrow : 进行borrowObject处理时,对拿到的connection进行validateObject校验 -->
+        <property name="testOnBorrow" value="${dynamicDataSource.testOnBorrow}" />
+
+        <!-- testOnReturn : 进行returnObject处理时,对返回的connection进行validateObject校验，个人觉得对数据库连接池的管理意义不大 -->
+        <property name="testOnReturn" value="${dynamicDataSource.testOnReturn}" />
+
+        <!-- testWhileIdle : 关注的重点,GenericObjectPool中针对pool管理,起了一个Evict的TimerTask定时线程进行控制(可通过设置参数timeBetweenEvictionRunsMillis>0),定时对线程池中的链接进行validateObject校验,对无效的链接进行关闭后,会调用ensureMinIdle,适当建立链接保证最小的minIdle连接数. -->
+        <property name="testWhileIdle" value="${dynamicDataSource.testWhileIdle}" />
+
+        <!-- timeBetweenEvictionRunsMillis,设置的Evict线程的时间,单位ms,大于0才会开启evict检查线程 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${dynamicDataSource.timeBetweenEvictionRunsMillis}" />
+
+        <!-- numTestsPerEvictionRun : 代表每次检查链接的数量,建议设置和maxActive一样大,这样每次可以有效检查所有的链接. -->
+        <property name="numTestsPerEvictionRun" value="${dynamicDataSource.numTestsPerEvictionRun}" />
+
+        <!-- 目标数据源 -->
+        <property name="targetDataSources">
+            <map key-type="java.lang.String">
+                <!-- <entry value-ref="dataSource" key="0"></entry> -->
+            </map>
+        </property>
+
+        <!-- 默认数据源名称 -->
+        <property name="defaultDataSourceName" value="dataSource" />
+
+        <!-- 默认数据源 -->
+        <property name="defaultTargetDataSource" ref="dataSource" />
+
+    </bean>
+
+    <!-- 数据库访问 -->
+    <!-- <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> <property name="driverClassName" value="${connection.driverClassName}" /> <property name="url" value="${connection.url}" /> <property name="username" value="${connection.username}" /> <property name="password" value="${connection.password}" /> </bean> -->
+</beans>

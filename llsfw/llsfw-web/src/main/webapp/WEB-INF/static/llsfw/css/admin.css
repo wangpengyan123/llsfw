@@ -1,0 +1,63 @@
+.overflowIeHide{
+     overflow:hidden;
+}
+
+.topDiv {
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	outline: none;
+	overflow: hidden;
+}
+
+#header {
+	width: 100%;
+	border-bottom: 1px solid #e3e3e3;
+	background-color: #fff;
+	padding: 0px;
+	background: #09C;
+}
+
+#header .header-layout {
+	padding: 2px 0;
+	overflow: hidden
+}
+
+#header .header-layout .logo-title {
+	float: left;
+	display: inline-block;
+	width: auto;
+	line-height: 30px;
+	font-size: 24px;
+	font-weight: normal;
+	margin-top: 2px;
+	color: #fff;
+	padding-left: 10px;
+}
+
+#header .header-layout .header-nav {
+	width: auto;
+	float: right;
+	margin-top: 9px
+}
+
+#header .header-layout .header-nav li {
+	float: left;
+	padding: 0 0 0 10px;
+	margin-right: 10px;
+	border-left: 1px solid #fff
+}
+
+#header .header-layout .header-nav li.nav-first {
+	border-left: 0
+}
+
+#header .header-layout .header-nav li a {
+	color: #fff;
+	font-size: 18px;
+	text-decoration: none
+}
+
+ol, ul {
+	list-style: none
+}
